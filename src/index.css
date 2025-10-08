@@ -162,4 +162,11 @@ All colors MUST be HSL.
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
+  
+  /* ContentEditable placeholder */
+  [contenteditable][data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    opacity: 0.6;
+  }
 }

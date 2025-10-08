@@ -8,14 +8,16 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Save } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Save, Plus, Edit, Trash2, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 const StoryForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { stories, addStory, updateStory } = useApp();
+  const { stories, addStory, updateStory, deleteChapter } = useApp();
   const isNew = id === 'new';
+  const story = stories.find(s => s.id === id);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -28,21 +30,18 @@ const StoryForm = () => {
   });
 
   useEffect(() => {
-    if (!isNew && id) {
-      const story = stories.find(s => s.id === id);
-      if (story) {
-        setFormData({
-          title: story.title,
-          genre: story.genre,
-          synopsis: story.synopsis,
-          status: story.status,
-          startDate: story.startDate,
-          coverImage: story.coverImage || '',
-          notes: story.notes,
-        });
-      }
+    if (!isNew && story) {
+      setFormData({
+        title: story.title,
+        genre: story.genre,
+        synopsis: story.synopsis,
+        status: story.status,
+        startDate: story.startDate,
+        coverImage: story.coverImage || '',
+        notes: story.notes,
+      });
     }
-  }, [id, isNew, stories]);
+  }, [id, isNew, story]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +69,25 @@ const StoryForm = () => {
     navigate('/dashboard');
   };
 
+  const handleDeleteChapter = (chapterId: string) => {
+    if (id && confirm('Deseja realmente excluir este capítulo?')) {
+      deleteChapter(id, chapterId);
+      toast.success('Capítulo excluído!');
+    }
+  };
+
+  const statusColors = {
+    draft: 'bg-muted text-muted-foreground',
+    review: 'bg-warning/20 text-warning',
+    published: 'bg-success/20 text-success',
+  };
+
+  const statusLabels = {
+    draft: 'Rascunho',
+    review: 'Revisão',
+    published: 'Publicado',
+  };
+
   return (
     <Layout>
       <div className="container mx-auto p-6 max-w-4xl">
@@ -89,8 +107,9 @@ const StoryForm = () => {
 
         <form onSubmit={handleSubmit}>
           <Tabs defaultValue="general" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="general">Informações Gerais</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="general">Informações</TabsTrigger>
+              <TabsTrigger value="chapters" disabled={isNew}>Capítulos</TabsTrigger>
               <TabsTrigger value="notes">Notas</TabsTrigger>
             </TabsList>
 
@@ -171,6 +190,92 @@ const StoryForm = () => {
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                 />
               </div>
+            </TabsContent>
+
+            <TabsContent value="chapters" className="space-y-6">
+              {!isNew && story && (
+                <>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-semibold">
+                        {story.chapters.length} {story.chapters.length === 1 ? 'Capítulo' : 'Capítulos'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {story.wordCount.toLocaleString()} palavras no total
+                      </p>
+                    </div>
+                    <Button 
+                      type="button"
+                      onClick={() => navigate(`/chapter/${story.id}/new`)}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Capítulo
+                    </Button>
+                  </div>
+
+                  {story.chapters.length > 0 ? (
+                    <div className="space-y-3">
+                      {story.chapters.map((chapter) => (
+                        <div
+                          key={chapter.id}
+                          className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-start gap-3 flex-1">
+                            <FileText className="w-5 h-5 text-muted-foreground mt-0.5" />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-semibold">
+                                  Capítulo {chapter.number}: {chapter.title}
+                                </h4>
+                                <Badge className={statusColors[chapter.status]}>
+                                  {statusLabels[chapter.status]}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {chapter.wordCount} palavras • 
+                                Última edição: {new Date(chapter.updatedAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/chapter/${story.id}/${chapter.id}`)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteChapter(chapter.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+                      <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <h3 className="text-lg font-semibold mb-2">Nenhum capítulo ainda</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Comece escrevendo o primeiro capítulo da sua história
+                      </p>
+                      <Button 
+                        type="button"
+                        onClick={() => navigate(`/chapter/${story.id}/new`)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Criar Primeiro Capítulo
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
             </TabsContent>
 
             <TabsContent value="notes" className="space-y-6">
