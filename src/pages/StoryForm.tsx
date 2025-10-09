@@ -9,15 +9,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Save, Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ArrowLeft, Save, Plus, Edit, Trash2, FileText, User, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const StoryForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { stories, addStory, updateStory, deleteChapter } = useApp();
+  const { stories, characters, addStory, updateStory, deleteChapter } = useApp();
   const isNew = id === 'new';
   const story = stories.find(s => s.id === id);
+  const [showCharacterModal, setShowCharacterModal] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -75,6 +78,34 @@ const StoryForm = () => {
       toast.success('Capítulo excluído!');
     }
   };
+
+  const handleAddCharacterToStory = (characterId: string) => {
+    if (!id || !story) return;
+    
+    if (story.characters.includes(characterId)) {
+      toast.error('Personagem já adicionado a esta história');
+      return;
+    }
+
+    updateStory(id, {
+      ...story,
+      characters: [...story.characters, characterId],
+    });
+    toast.success('Personagem adicionado à história!');
+  };
+
+  const handleRemoveCharacterFromStory = (characterId: string) => {
+    if (!id || !story) return;
+
+    updateStory(id, {
+      ...story,
+      characters: story.characters.filter(cId => cId !== characterId),
+    });
+    toast.success('Personagem removido da história!');
+  };
+
+  const storyCharacters = characters.filter(c => story?.characters.includes(c.id));
+  const availableCharacters = characters.filter(c => !story?.characters.includes(c.id));
 
   const statusColors = {
     draft: 'bg-muted text-muted-foreground',
@@ -293,7 +324,7 @@ const StoryForm = () => {
                     </div>
                     <Button 
                       type="button"
-                      onClick={() => navigate('/characters')}
+                      onClick={() => setShowCharacterModal(true)}
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Adicionar Personagem
@@ -302,10 +333,39 @@ const StoryForm = () => {
 
                   {story.characters.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {/* Aqui serão exibidos os personagens */}
-                      <p className="col-span-full text-center text-muted-foreground">
-                        Funcionalidade de visualização de personagens em desenvolvimento
-                      </p>
+                      {storyCharacters.map((character) => (
+                        <div key={character.id} className="border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow">
+                          <div className="flex items-start gap-3">
+                            <Avatar className="w-12 h-12">
+                              <AvatarImage src={character.avatar} />
+                              <AvatarFallback>
+                                <User className="w-6 h-6" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold truncate">{character.name}</h4>
+                              <p className="text-sm text-muted-foreground">{character.age}</p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveCharacterFromStory(character.id)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <Badge variant={
+                            character.role === 'protagonist' ? 'default' :
+                            character.role === 'antagonist' ? 'destructive' :
+                            'secondary'
+                          }>
+                            {character.role === 'protagonist' ? 'Protagonista' :
+                             character.role === 'antagonist' ? 'Antagonista' :
+                             character.role === 'supporting' ? 'Coadjuvante' : 'Outro'}
+                          </Badge>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
@@ -316,7 +376,7 @@ const StoryForm = () => {
                       </p>
                       <Button 
                         type="button"
-                        onClick={() => navigate('/characters')}
+                        onClick={() => setShowCharacterModal(true)}
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Adicionar Primeiro Personagem
@@ -356,6 +416,79 @@ const StoryForm = () => {
             </Button>
           </div>
         </form>
+
+        <Dialog open={showCharacterModal} onOpenChange={setShowCharacterModal}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-display">
+                Adicionar Personagens à História
+              </DialogTitle>
+            </DialogHeader>
+
+            {availableCharacters.length > 0 ? (
+              <div className="grid grid-cols-1 gap-3">
+                {availableCharacters.map((character) => (
+                  <div
+                    key={character.id}
+                    className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={character.avatar} />
+                      <AvatarFallback>
+                        <User className="w-6 h-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold">{character.name}</h4>
+                      <p className="text-sm text-muted-foreground">{character.age}</p>
+                      <div className="mt-1">
+                        <Badge variant={
+                          character.role === 'protagonist' ? 'default' :
+                          character.role === 'antagonist' ? 'destructive' :
+                          'secondary'
+                        }>
+                          {character.role === 'protagonist' ? 'Protagonista' :
+                           character.role === 'antagonist' ? 'Antagonista' :
+                           character.role === 'supporting' ? 'Coadjuvante' : 'Outro'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        handleAddCharacterToStory(character.id);
+                        setShowCharacterModal(false);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <User className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <h3 className="text-lg font-semibold mb-2">Nenhum personagem disponível</h3>
+                <p className="text-muted-foreground mb-4">
+                  Crie novos personagens na página de Personagens
+                </p>
+                <Button onClick={() => {
+                  setShowCharacterModal(false);
+                  navigate('/characters');
+                }}>
+                  Ir para Personagens
+                </Button>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowCharacterModal(false)}>
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );

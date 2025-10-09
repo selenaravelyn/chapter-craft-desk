@@ -105,7 +105,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     },
   ]);
   
-  const [characters, setCharacters] = useState<Character[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([
+    {
+      id: 'char1',
+      storyIds: [],
+      name: 'Luna Silvestre',
+      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
+      age: '24 anos',
+      physicalDescription: 'Cabelos negros longos, olhos verdes penetrantes, 1,68m de altura',
+      personality: 'Corajosa e determinada, mas com um lado vulnerável que esconde',
+      backstory: 'Cresceu em uma pequena vila nas montanhas, perdeu os pais ainda jovem',
+      role: 'protagonist',
+      relationships: 'Melhor amiga de Sarah, possui uma relação complexa com Marcus',
+      createdAt: '2024-01-10',
+    },
+    {
+      id: 'char2',
+      storyIds: [],
+      name: 'Marcus Blackwood',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+      age: '28 anos',
+      physicalDescription: 'Cabelos castanhos escuros, olhos azuis, porte atlético',
+      personality: 'Misterioso e reservado, mas leal aos que confia',
+      backstory: 'Vem de uma família rica, mas rejeitou a fortuna para seguir seu próprio caminho',
+      role: 'supporting',
+      relationships: 'Interesse romântico de Luna, rival de Viktor',
+      createdAt: '2024-01-11',
+    },
+  ]);
   const [notes, setNotes] = useState<Note[]>([]);
 
   const addStory = (story: Omit<Story, 'id' | 'createdAt' | 'updatedAt'>) => {
