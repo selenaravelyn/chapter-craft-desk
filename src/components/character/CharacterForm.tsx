@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CharacterFormProps {
@@ -187,32 +189,48 @@ const CharacterForm = ({ open, onOpenChange, characterId }: CharacterFormProps) 
           </div>
 
           <div className="space-y-2">
-            <Label>Histórias associadas</Label>
-            <div className="space-y-2">
-              {stories.map((story) => (
-                <label key={story.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.storyIds.includes(story.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setFormData({
-                          ...formData,
-                          storyIds: [...formData.storyIds, story.id],
-                        });
-                      } else {
-                        setFormData({
-                          ...formData,
-                          storyIds: formData.storyIds.filter(id => id !== story.id),
-                        });
-                      }
-                    }}
-                    className="rounded border-input"
-                  />
-                  <span className="text-sm">{story.title}</span>
-                </label>
-              ))}
-            </div>
+            <Label htmlFor="stories">Histórias Associadas</Label>
+            <Select
+              value=""
+              onValueChange={(value) => {
+                if (!formData.storyIds.includes(value)) {
+                  setFormData({ ...formData, storyIds: [...formData.storyIds, value] });
+                }
+              }}
+            >
+              <SelectTrigger id="stories" className="bg-background">
+                <SelectValue placeholder="Selecione as histórias" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {stories.filter(story => !formData.storyIds.includes(story.id)).map((story) => (
+                  <SelectItem key={story.id} value={story.id}>
+                    {story.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {formData.storyIds.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.storyIds.map((storyId) => {
+                  const story = stories.find(s => s.id === storyId);
+                  return story ? (
+                    <Badge key={storyId} variant="secondary" className="gap-2">
+                      {story.title}
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ 
+                          ...formData, 
+                          storyIds: formData.storyIds.filter(id => id !== storyId) 
+                        })}
+                        className="hover:text-destructive"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ) : null;
+                })}
+              </div>
+            )}
           </div>
 
           <DialogFooter>
