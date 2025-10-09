@@ -107,9 +107,10 @@ const StoryForm = () => {
 
         <form onSubmit={handleSubmit}>
           <Tabs defaultValue="general" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="general">Informações</TabsTrigger>
               <TabsTrigger value="chapters" disabled={isNew}>Capítulos</TabsTrigger>
+              <TabsTrigger value="characters" disabled={isNew}>Personagens</TabsTrigger>
               <TabsTrigger value="notes">Notas</TabsTrigger>
             </TabsList>
 
@@ -271,6 +272,54 @@ const StoryForm = () => {
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Criar Primeiro Capítulo
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </TabsContent>
+
+            <TabsContent value="characters" className="space-y-6">
+              {!isNew && story && (
+                <>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-semibold">
+                        {story.characters.length} {story.characters.length === 1 ? 'Personagem' : 'Personagens'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Gerencie os personagens desta história
+                      </p>
+                    </div>
+                    <Button 
+                      type="button"
+                      onClick={() => navigate('/characters')}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar Personagem
+                    </Button>
+                  </div>
+
+                  {story.characters.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Aqui serão exibidos os personagens */}
+                      <p className="col-span-full text-center text-muted-foreground">
+                        Funcionalidade de visualização de personagens em desenvolvimento
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+                      <Plus className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <h3 className="text-lg font-semibold mb-2">Nenhum personagem ainda</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Adicione personagens para enriquecer sua história
+                      </p>
+                      <Button 
+                        type="button"
+                        onClick={() => navigate('/characters')}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar Primeiro Personagem
                       </Button>
                     </div>
                   )}
