@@ -18,7 +18,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    // Tenta carregar usuário do localStorage
+    const storedUser = localStorage.getItem('storylab_user');
+    if (storedUser) {
+      return JSON.parse(storedUser);
+    }
+    // Usuário padrão para demonstração
+    return {
+      id: '1',
+      name: 'Escritora',
+      email: 'escritora@storylab.com',
+    };
+  });
+
+  // Persiste o usuário no localStorage sempre que mudar
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('storylab_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('storylab_user');
+    }
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     // Simulação de login
@@ -41,7 +62,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    setUser(null);
+    setUser({
+      id: '1',
+      name: 'Escritora',
+      email: 'escritora@storylab.com',
+    });
   };
 
   return (
