@@ -112,6 +112,15 @@ const Dashboard = () => {
                 {/* Actions */}
                 <div className="flex gap-2 pt-2">
                   <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => navigate(`/story/${story.id}/view`)}
+                  >
+                    <BookOpen className="w-4 h-4 mr-1" />
+                    Ver
+                  </Button>
+                  <Button
                     variant="default"
                     size="sm"
                     className="flex-1"

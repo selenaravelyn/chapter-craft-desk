@@ -9,6 +9,7 @@ import { AppProvider } from "./contexts/AppContext";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import StoryForm from "./pages/StoryForm";
+import StoryView from "./pages/StoryView";
 import ChapterEditor from "./components/chapter/ChapterEditor";
 import Characters from "./pages/Characters";
 import Notes from "./pages/Notes";
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/story/:id" element={<StoryForm />} />
+                <Route path="/story/:id/view" element={<StoryView />} />
                 <Route path="/chapter/:storyId/:chapterId" element={<ChapterEditor />} />
                 <Route path="/characters" element={<Characters />} />
                 <Route path="/notes" element={<Notes />} />
