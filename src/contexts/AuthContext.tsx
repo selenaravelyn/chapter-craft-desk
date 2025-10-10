@@ -1,76 +1,148 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Session } from '@supabase/supabase-js';
 
-interface User {
+interface Profile {
   id: string;
   name: string;
+  avatar_url?: string;
+  bio?: string;
+}
+
+interface User extends Profile {
   email: string;
-  profileImage?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  session: Session | null;
+  loading: boolean;
   isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signup: (name: string, email: string, password: string) => Promise<{ error: Error | null }>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    // Tenta carregar usuário do localStorage
-    const storedUser = localStorage.getItem('storylab_user');
-    if (storedUser) {
-      return JSON.parse(storedUser);
-    }
-    // Usuário padrão para demonstração
-    return {
-      id: '1',
-      name: 'Escritora',
-      email: 'escritora@storylab.com',
-    };
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Persiste o usuário no localStorage sempre que mudar
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('storylab_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('storylab_user');
-    }
-  }, [user]);
+    // Configurar listener de mudanças de autenticação PRIMEIRO
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          // Buscar perfil do usuário de forma assíncrona
+          setTimeout(async () => {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', currentSession.user.id)
+              .single();
+            
+            if (profile) {
+              setUser({
+                id: profile.id,
+                name: profile.name,
+                email: currentSession.user.email || '',
+                avatar_url: profile.avatar_url,
+                bio: profile.bio,
+              });
+            }
+          }, 0);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    // DEPOIS verificar sessão existente
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      
+      if (currentSession?.user) {
+        setTimeout(async () => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentSession.user.id)
+            .single();
+          
+          if (profile) {
+            setUser({
+              id: profile.id,
+              name: profile.name,
+              email: currentSession.user.email || '',
+              avatar_url: profile.avatar_url,
+              bio: profile.bio,
+            });
+          }
+          setLoading(false);
+        }, 0);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const login = async (email: string, password: string) => {
-    // Simulação de login
-    const mockUser: User = {
-      id: '1',
-      name: email.split('@')[0],
-      email: email,
-    };
-    setUser(mockUser);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
   };
 
   const signup = async (name: string, email: string, password: string) => {
-    // Simulação de cadastro
-    const mockUser: User = {
-      id: '1',
-      name: name,
-      email: email,
-    };
-    setUser(mockUser);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            name,
+          },
+        },
+      });
+      
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
   };
 
-  const logout = () => {
-    setUser({
-      id: '1',
-      name: 'Escritora',
-      email: 'escritora@storylab.com',
-    });
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      loading, 
+      isAuthenticated: !!user,
+      login, 
+      signup, 
+      logout 
+    }}>
       {children}
     </AuthContext.Provider>
   );

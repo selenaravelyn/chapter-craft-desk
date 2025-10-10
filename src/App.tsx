@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppProvider } from "./contexts/AppContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import StoryForm from "./pages/StoryForm";
@@ -31,14 +32,14 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/story/:id" element={<StoryForm />} />
-                <Route path="/story/:id/view" element={<StoryView />} />
-                <Route path="/chapter/:storyId/:chapterId" element={<ChapterEditor />} />
-                <Route path="/characters" element={<Characters />} />
-                <Route path="/notes" element={<Notes />} />
-                <Route path="/statistics" element={<Statistics />} />
-                <Route path="/settings" element={<Settings />} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/story/:id" element={<ProtectedRoute><StoryForm /></ProtectedRoute>} />
+                <Route path="/story/:id/view" element={<ProtectedRoute><StoryView /></ProtectedRoute>} />
+                <Route path="/chapter/:storyId/:chapterId" element={<ProtectedRoute><ChapterEditor /></ProtectedRoute>} />
+                <Route path="/characters" element={<ProtectedRoute><Characters /></ProtectedRoute>} />
+                <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
+                <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

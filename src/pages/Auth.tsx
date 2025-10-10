@@ -8,8 +8,9 @@ import { PenTool } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Auth = () => {
-  const { isAuthenticated, login, signup } = useAuth();
+  const { isAuthenticated, loading, login, signup } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,27 +18,63 @@ const Auth = () => {
     confirmPassword: '',
   });
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
       if (isLogin) {
-        await login(formData.email, formData.password);
-        toast.success('Login realizado com sucesso!');
+        const { error } = await login(formData.email, formData.password);
+        if (error) {
+          toast.error(
+            error.message === 'Invalid login credentials'
+              ? 'Email ou senha incorretos'
+              : 'Erro ao fazer login. Tente novamente.'
+          );
+        } else {
+          toast.success('Login realizado com sucesso!');
+        }
       } else {
         if (formData.password !== formData.confirmPassword) {
           toast.error('As senhas não coincidem');
+          setIsSubmitting(false);
           return;
         }
-        await signup(formData.name, formData.email, formData.password);
-        toast.success('Conta criada com sucesso!');
+        if (formData.password.length < 6) {
+          toast.error('A senha deve ter no mínimo 6 caracteres');
+          setIsSubmitting(false);
+          return;
+        }
+        const { error } = await signup(formData.name, formData.email, formData.password);
+        if (error) {
+          toast.error(
+            error.message === 'User already registered'
+              ? 'Este email já está cadastrado'
+              : 'Erro ao criar conta. Tente novamente.'
+          );
+        } else {
+          toast.success('Conta criada com sucesso!');
+        }
       }
     } catch (error) {
       toast.error('Erro ao autenticar. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -107,8 +144,8 @@ const Auth = () => {
               </div>
             )}
 
-            <Button type="submit" className="w-full">
-              {isLogin ? 'Entrar' : 'Criar conta'}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (isLogin ? 'Entrando...' : 'Criando conta...') : (isLogin ? 'Entrar' : 'Criar conta')}
             </Button>
 
             <div className="text-center">
