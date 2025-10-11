@@ -6,46 +6,42 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PenTool } from 'lucide-react';
 import { toast } from 'sonner';
-
 const Auth = () => {
-  const { isAuthenticated, loading, login, signup } = useAuth();
+  const {
+    isAuthenticated,
+    loading,
+    login,
+    signup
+  } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    confirmPassword: ''
   });
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Carregando...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
     try {
       if (isLogin) {
-        const { error } = await login(formData.email, formData.password);
+        const {
+          error
+        } = await login(formData.email, formData.password);
         if (error) {
-          toast.error(
-            error.message === 'Invalid login credentials'
-              ? 'Email ou senha incorretos'
-              : 'Erro ao fazer login. Tente novamente.'
-          );
+          toast.error(error.message === 'Invalid login credentials' ? 'Email ou senha incorretos' : 'Erro ao fazer login. Tente novamente.');
         } else {
           toast.success('Login realizado com sucesso!');
         }
@@ -60,13 +56,11 @@ const Auth = () => {
           setIsSubmitting(false);
           return;
         }
-        const { error } = await signup(formData.name, formData.email, formData.password);
+        const {
+          error
+        } = await signup(formData.name, formData.email, formData.password);
         if (error) {
-          toast.error(
-            error.message === 'User already registered'
-              ? 'Este email já está cadastrado'
-              : 'Erro ao criar conta. Tente novamente.'
-          );
+          toast.error(error.message === 'User already registered' ? 'Este email já está cadastrado' : 'Erro ao criar conta. Tente novamente.');
         } else {
           toast.success('Conta criada com sucesso!');
         }
@@ -77,9 +71,7 @@ const Auth = () => {
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <div className="min-h-screen flex">
+  return <div className="min-h-screen flex">
       {/* Left side - Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
@@ -92,68 +84,44 @@ const Auth = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!isLogin && (
-              <div className="space-y-2">
+            {!isLogin && <div className="space-y-2">
                 <Label htmlFor="name">Nome completo *</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Seu nome"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required={!isLogin}
-                />
-              </div>
-            )}
+                <Input id="name" type="text" placeholder="Seu nome" value={formData.name} onChange={e => setFormData({
+              ...formData,
+              name: e.target.value
+            })} required={!isLogin} />
+              </div>}
 
             <div className="space-y-2">
               <Label htmlFor="email">E-mail *</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-              />
+              <Input id="email" type="email" placeholder="seu@email.com" value={formData.email} onChange={e => setFormData({
+              ...formData,
+              email: e.target.value
+            })} required />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Senha *</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
+              <Input id="password" type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({
+              ...formData,
+              password: e.target.value
+            })} required />
             </div>
 
-            {!isLogin && (
-              <div className="space-y-2">
+            {!isLogin && <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmar senha *</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  required={!isLogin}
-                />
-              </div>
-            )}
+                <Input id="confirmPassword" type="password" placeholder="••••••••" value={formData.confirmPassword} onChange={e => setFormData({
+              ...formData,
+              confirmPassword: e.target.value
+            })} required={!isLogin} />
+              </div>}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? (isLogin ? 'Entrando...' : 'Criando conta...') : (isLogin ? 'Entrar' : 'Criar conta')}
+              {isSubmitting ? isLogin ? 'Entrando...' : 'Criando conta...' : isLogin ? 'Entrar' : 'Criar conta'}
             </Button>
 
             <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-primary hover:underline text-sm"
-              >
+              <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-primary hover:underline text-sm">
                 {isLogin ? 'Não tem uma conta? Criar agora' : 'Já tem uma conta? Entrar'}
               </button>
             </div>
@@ -163,17 +131,8 @@ const Auth = () => {
 
       {/* Right side - Illustration (desktop only) */}
       <div className="hidden lg:flex flex-1 gradient-primary items-center justify-center p-8">
-        <div className="text-center text-white space-y-6 max-w-lg">
-          <h2 className="text-5xl font-display font-bold">
-            Transforme suas ideias em histórias incríveis
-          </h2>
-          <p className="text-xl text-white/90">
-            Organize suas histórias, personagens e capítulos em um único lugar
-          </p>
-        </div>
+        
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Auth;
