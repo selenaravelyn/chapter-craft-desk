@@ -9,7 +9,7 @@ import { Plus, User, Search, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Characters = () => {
-  const { characters, deleteCharacter, stories } = useApp();
+  const { characters, deleteCharacter, stories, loading } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | undefined>();
@@ -52,6 +52,19 @@ const Characters = () => {
   const getStoryTitle = (storyId: string) => {
     return stories.find(s => s.id === storyId)?.title || 'História desconhecida';
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto p-6 flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando personagens...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

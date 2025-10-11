@@ -8,7 +8,7 @@ import { Plus, BookOpen, Edit, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Dashboard = () => {
-  const { stories, deleteStory } = useApp();
+  const { stories, deleteStory, loading } = useApp();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<string>('all');
 
@@ -29,6 +29,19 @@ const Dashboard = () => {
   const filteredStories = filter === 'all' 
     ? stories 
     : stories.filter(s => s.status === filter);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto p-6 flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando histórias...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
