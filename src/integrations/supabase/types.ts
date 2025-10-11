@@ -14,6 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      chapters: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          number: number
+          status: string
+          story_id: string
+          title: string
+          updated_at: string
+          word_count: number
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          number: number
+          status?: string
+          story_id: string
+          title: string
+          updated_at?: string
+          word_count?: number
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          number?: number
+          status?: string
+          story_id?: string
+          title?: string
+          updated_at?: string
+          word_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      characters: {
+        Row: {
+          age: string | null
+          avatar: string | null
+          backstory: string | null
+          created_at: string
+          id: string
+          name: string
+          personality: string | null
+          physical_description: string | null
+          relationships: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          age?: string | null
+          avatar?: string | null
+          backstory?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          personality?: string | null
+          physical_description?: string | null
+          relationships?: string | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          age?: string | null
+          avatar?: string | null
+          backstory?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          personality?: string | null
+          physical_description?: string | null
+          relationships?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -40,6 +156,81 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      stories: {
+        Row: {
+          cover_image: string | null
+          created_at: string
+          genre: string | null
+          id: string
+          notes: string | null
+          start_date: string
+          status: string
+          synopsis: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          word_count: number
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string
+          status?: string
+          synopsis?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          word_count?: number
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string
+          status?: string
+          synopsis?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          word_count?: number
+        }
+        Relationships: []
+      }
+      story_characters: {
+        Row: {
+          character_id: string
+          story_id: string
+        }
+        Insert: {
+          character_id: string
+          story_id: string
+        }
+        Update: {
+          character_id?: string
+          story_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_characters_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_characters_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
