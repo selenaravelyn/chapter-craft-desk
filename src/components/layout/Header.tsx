@@ -23,7 +23,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
 
         <div className="flex-1 lg:ml-0 ml-4">
           <h1 className="text-xl font-semibold">
-            Olá, <span className="gradient-primary bg-clip-text text-transparent">{user?.name}</span>! 👋
+            Olá, <span className="gradient-primary bg-clip-text text-transparent">Selena</span>! 👋
           </h1>
         </div>
 
