@@ -82,12 +82,12 @@ const Dashboard = () => {
               className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
             >
               {/* Cover Image */}
-              <div className="relative h-48 bg-muted overflow-hidden flex items-center justify-center">
+              <div className="relative h-48 bg-muted overflow-hidden">
                 {story.coverImage ? (
                   <img
                     src={story.coverImage}
                     alt={story.title}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
