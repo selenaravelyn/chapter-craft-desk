@@ -11,16 +11,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Save, Plus, Edit, Trash2, FileText, User, X } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Edit, Trash2, FileText, User, X, Upload, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const StoryForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { stories, characters, addStory, updateStory, deleteChapter } = useApp();
   const isNew = id === 'new';
   const story = stories.find(s => s.id === id);
   const [showCharacterModal, setShowCharacterModal] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -70,6 +74,49 @@ const StoryForm = () => {
     }
 
     navigate('/dashboard');
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Formato inválido. Use JPG, PNG, WEBP ou GIF');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5242880) {
+      toast.error('Arquivo muito grande. Tamanho máximo: 5MB');
+      return;
+    }
+
+    setUploadingCover(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('story-covers')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('story-covers')
+        .getPublicUrl(fileName);
+
+      setFormData({ ...formData, coverImage: publicUrl });
+      toast.success('Capa carregada com sucesso!');
+    } catch (error) {
+      console.error('Error uploading cover:', error);
+      toast.error('Erro ao fazer upload da capa');
+    } finally {
+      setUploadingCover(false);
+    }
   };
 
   const handleDeleteChapter = (chapterId: string) => {
@@ -204,7 +251,52 @@ const StoryForm = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="coverImage">URL da Capa</Label>
+                <Label>Capa da História</Label>
+                
+                {formData.coverImage && (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border mb-3">
+                    <img 
+                      src={formData.coverImage} 
+                      alt="Capa" 
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={() => setFormData({ ...formData, coverImage: '' })}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handleCoverUpload}
+                      disabled={uploadingCover}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={uploadingCover}
+                    onClick={() => document.getElementById('coverImageFile')?.click()}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadingCover ? 'Carregando...' : 'Upload'}
+                  </Button>
+                </div>
+
+                <div className="text-xs text-muted-foreground">
+                  Ou insira uma URL:
+                </div>
+                
                 <Input
                   id="coverImage"
                   value={formData.coverImage}
