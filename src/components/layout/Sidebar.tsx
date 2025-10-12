@@ -44,14 +44,21 @@ const Sidebar = ({
       <aside className={cn("fixed lg:sticky top-0 left-0 z-50 h-screen w-64 bg-card border-r border-border transition-transform duration-300 flex flex-col", isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0")}>
         {/* Header */}
         <div className="p-6 border-b border-border flex items-center justify-between">
-          <Link to="/dashboard" className="flex items-center space-x-2">
-            <PenTool className="w-8 h-8 text-primary" />
-            <span className="text-2xl font-display font-bold gradient-primary bg-clip-text text-transparent">StoryLab</span>
-          </Link>
-          <button onClick={onClose} className="lg:hidden p-1 hover:bg-muted rounded-lg transition-colors">
+          <div className="flex items-center space-x-3">
+            <Link to="/dashboard" className="flex items-center">
+              <PenTool className="w-8 h-8 text-primary" />
+            </Link>
+            <h1 className="text-xl font-semibold">Selena Ravelyn</h1>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="lg:hidden p-1 hover:bg-muted rounded-lg transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
+
 
         {/* Menu */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
