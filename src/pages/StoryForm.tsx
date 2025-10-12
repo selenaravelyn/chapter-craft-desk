@@ -273,24 +273,26 @@ const StoryForm = () => {
                 )}
 
                 <div className="flex gap-2">
-                  <div className="flex-1">
-                    <Input
+                  <div className="relative flex-1">
+                    <input
+                      id="coverImageFile"
                       type="file"
                       accept="image/jpeg,image/png,image/webp,image/gif"
                       onChange={handleCoverUpload}
                       disabled={uploadingCover}
-                      className="cursor-pointer"
+                      className="hidden"
                     />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploadingCover}
+                      onClick={() => document.getElementById('coverImageFile')?.click()}
+                      className="w-full"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {uploadingCover ? 'Enviando...' : 'Fazer Upload de Imagem'}
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={uploadingCover}
-                    onClick={() => document.getElementById('coverImageFile')?.click()}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {uploadingCover ? 'Carregando...' : 'Upload'}
-                  </Button>
                 </div>
 
                 <div className="text-xs text-muted-foreground">
