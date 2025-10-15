@@ -14,9 +14,10 @@ interface CharacterFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   characterId?: string;
+  storyId?: string;
 }
 
-const CharacterForm = ({ open, onOpenChange, characterId }: CharacterFormProps) => {
+const CharacterForm = ({ open, onOpenChange, characterId, storyId }: CharacterFormProps) => {
   const { characters, stories, addCharacter, updateCharacter } = useApp();
   const character = characterId ? characters.find(c => c.id === characterId) : null;
 
@@ -29,7 +30,7 @@ const CharacterForm = ({ open, onOpenChange, characterId }: CharacterFormProps) 
     personality: '',
     backstory: '',
     relationships: '',
-    storyIds: [] as string[],
+    storyIds: storyId ? [storyId] : [] as string[],
   });
 
   useEffect(() => {
@@ -55,10 +56,10 @@ const CharacterForm = ({ open, onOpenChange, characterId }: CharacterFormProps) 
         personality: '',
         backstory: '',
         relationships: '',
-        storyIds: [],
+        storyIds: storyId ? [storyId] : [],
       });
     }
-  }, [character, open]);
+  }, [character, open, storyId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,50 +189,52 @@ const CharacterForm = ({ open, onOpenChange, characterId }: CharacterFormProps) 
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="stories">Histórias Associadas</Label>
-            <Select
-              value=""
-              onValueChange={(value) => {
-                if (!formData.storyIds.includes(value)) {
-                  setFormData({ ...formData, storyIds: [...formData.storyIds, value] });
-                }
-              }}
-            >
-              <SelectTrigger id="stories" className="bg-background">
-                <SelectValue placeholder="Selecione as histórias" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                {stories.filter(story => !formData.storyIds.includes(story.id)).map((story) => (
-                  <SelectItem key={story.id} value={story.id}>
-                    {story.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {formData.storyIds.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.storyIds.map((storyId) => {
-                  const story = stories.find(s => s.id === storyId);
-                  return story ? (
-                    <Badge key={storyId} variant="secondary" className="gap-2">
+          {!storyId && (
+            <div className="space-y-2">
+              <Label htmlFor="stories">Histórias Associadas</Label>
+              <Select
+                value=""
+                onValueChange={(value) => {
+                  if (!formData.storyIds.includes(value)) {
+                    setFormData({ ...formData, storyIds: [...formData.storyIds, value] });
+                  }
+                }}
+              >
+                <SelectTrigger id="stories" className="bg-background">
+                  <SelectValue placeholder="Selecione as histórias" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {stories.filter(story => !formData.storyIds.includes(story.id)).map((story) => (
+                    <SelectItem key={story.id} value={story.id}>
                       {story.title}
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ 
-                          ...formData, 
-                          storyIds: formData.storyIds.filter(id => id !== storyId) 
-                        })}
-                        className="hover:text-destructive"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ) : null;
-                })}
-              </div>
-            )}
-          </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {formData.storyIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.storyIds.map((storyId) => {
+                    const story = stories.find(s => s.id === storyId);
+                    return story ? (
+                      <Badge key={storyId} variant="secondary" className="gap-2">
+                        {story.title}
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ 
+                            ...formData, 
+                            storyIds: formData.storyIds.filter(id => id !== storyId) 
+                          })}
+                          className="hover:text-destructive"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

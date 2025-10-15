@@ -5,13 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, BookOpen, User } from 'lucide-react';
+import { ArrowLeft, BookOpen, User, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import CharacterForm from '@/components/character/CharacterForm';
 
 const StoryView = () => {
   const { id } = useParams<{ id: string }>();
   const { stories, characters } = useApp();
   const navigate = useNavigate();
+  const [isCharacterFormOpen, setIsCharacterFormOpen] = useState(false);
 
   const story = stories.find(s => s.id === id);
 
@@ -82,13 +85,26 @@ const StoryView = () => {
         </Card>
 
         {/* Characters */}
-        {storyCharacters.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Personagens</CardTitle>
-              <CardDescription>{storyCharacters.length} personagens nesta história</CardDescription>
-            </CardHeader>
-            <CardContent>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Personagens</CardTitle>
+                <CardDescription>{storyCharacters.length} personagens nesta história</CardDescription>
+              </div>
+              <Button onClick={() => setIsCharacterFormOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Personagem
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {storyCharacters.length === 0 ? (
+              <div className="text-center py-8">
+                <User className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">Nenhum personagem ainda</p>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {storyCharacters.map((character) => (
                   <div
@@ -112,9 +128,15 @@ const StoryView = () => {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
+
+        <CharacterForm 
+          open={isCharacterFormOpen} 
+          onOpenChange={setIsCharacterFormOpen}
+          storyId={id}
+        />
 
         {/* Chapters */}
         <Card>
